@@ -1,10 +1,15 @@
 import logging
 from flask import current_app, jsonify
+from dotenv import load_dotenv
+import os
 import json
 import requests
 
 # from app.services.openai_service import generate_response
 import re
+
+# save current conversation step to keep track
+current_conv = 0
 
 
 def log_http_response(response):
@@ -26,8 +31,21 @@ def get_text_message_input(recipient, text):
 
 
 def generate_response(response):
+    global current_conv
+    global users_data
     # Return text in uppercase
-    return response.upper()
+    response_body = response.upper()
+    if response_body == "/START" :
+        current_conv = 1
+        return "*Selamat datang pada chatbot pelayanan umum Kelurahan Combongan* \nBerikut adalah pilihan menu yang dapat anda pilih ! \n*1.* Ajukan pertanyaan \n*2.* Buat persuratan"
+    else:
+        if current_conv == 0:
+            return "test response : " + response_body
+        elif response_body == "/KELUAR":
+            current_conv = 0
+            return "Anda telah keluar dari percakapan, terimakasih atas perhatiannya!"
+        else:
+            return "Maaf menu yang anda masukan salah, silahkan pilih dari salah satu menu yang disediakan"
 
 
 def send_message(data):
@@ -105,3 +123,6 @@ def is_valid_whatsapp_message(body):
         and body["entry"][0]["changes"][0]["value"].get("messages")
         and body["entry"][0]["changes"][0]["value"]["messages"][0]
     )
+
+def chatbot_chat(msg):
+    return str(msg)
